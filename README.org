@@ -6,7 +6,7 @@ A collection of C++ (mostly, C++11) header-only utility libraries.
 
 **** Examples
 
-Below you can find code snippets. For full examples and some tests, see the [[examples]] folder.
+Below you can find code snippets. For full examples and some tests, see the [[examples]] folder. In some cases, sample programs are included in the header files themselves, and they can be enabled by specific CPP defines.
 
 ***** logger: Thread-safe facility-based logging mechanism.
 
@@ -80,12 +80,13 @@ pfor::pfor< unsigned >(
 ...
 void some_work(unsigned tid, unsigned i);
 ...
-tpool::tpool p(4);
-for (int unsigned = 0; round < 10; ++round)
+tpool::tpool p(4); // create a pool of 4 worker threads
+for (int unsigned = 0; round < 10; ++round) // perform 10 rounds of work
 {
-    for (unsigned i = 0; i < n; ++i)
+    for (unsigned i = 0; i < n; ++i) // in each round, work on n items
     {
-        p.add_job([&] (unsigned tid) { some_work(tid, 3); });
+        // Note: the lambda must capture i by value, not by reference
+        p.add_job([&,i] (unsigned tid) { some_work(tid, i); });
     }
     p.wait_jobs();
 }
