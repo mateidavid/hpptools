@@ -1,0 +1,97 @@
+# -*- mode:org; mode:visual-line; coding:utf-8; -*-
+
+*** C++ Header Tools
+
+A collection of C++ (mostly, C++11) header-only utility libraries.
+
+**** Examples
+
+Below you can find code snippets. For full examples and some tests, see the [[examples]] folder.
+
+***** logger: Thread-safe facility-based logging mechanism.
+
+#+BEGIN_EXAMPLE
+#include "logger.hpp"
+...
+logger::Logger::set_default_level("info");
+LOG(info) << "now you see me\n";
+LOG(debug) << "now you don't\n";
+#+END_EXAMPLE
+
+***** zstr: ZLib wrapper.
+
+#+BEGIN_EXAMPLE
+#include "zstr.hpp"
+...
+zstr::ifstream(argv[1]) >> i;
+#+END_EXAMPLE
+
+***** algorithm_extra: Collection of new and extended SL algorithms.
+
+#+BEGIN_EXAMPLE
+#include "algorithm_extra.hpp"
+...
+auto all_div_by_3 = equal_of(std::vector< int >{3, 6, 17}, [] (int i) { return i%3; }); // true
+#+END_EXAMPLE
+
+***** join: A C++ implementation of Python's join.
+
+#+BEGIN_EXAMPLE
+#include "join.hpp"
+...
+std::cout << "v: " << join_ns::join(std::vector< int >{1, 2, 3}, ", ") << std::endl;
+#+END_EXAMPLE
+
+***** logsum: Floating point additions in logarithmic space using table lookup.
+
+*Note*: This library is based on Sean Eddy's code, originall part of HMMER. The version included in here is header-only, and it using implicit table initialization (no need to explicitly call =p7_FLogsumInit()=).
+
+#+BEGIN_EXAMPLE
+#include "logsum.hpp"
+...
+float r = p7_FLogsum(.5, .3);
+#+END_EXAMPLE
+
+***** pfor: C++11-based parallel for, with optional output sorting.
+
+#+BEGIN_EXAMPLE
+#include "pfor.hpp"
+...
+std::vector< unsigned > v(1000);
+unsigned crt_idx = 0;
+pfor::pfor< unsigned >(
+    4,                // num_threads
+    10,               // chunk_size
+    [&] (unsigned& i) // get_item
+    {
+        if (crt_idx >= v.size()) return false;
+        i = crt_idx++; return true;
+    },
+    [&] (unsigned& i) // process_item
+    {
+        v[i] = i*i;
+    });
+#+END_EXAMPLE
+
+***** tpool: C++11-based thread pool.
+
+#+BEGIN_EXAMPLE
+#include "tpool.hpp"
+...
+void some_work(unsigned tid, unsigned i);
+...
+tpool::tpool p(4);
+for (int unsigned = 0; round < 10; ++round)
+{
+    for (unsigned i = 0; i < n; ++i)
+    {
+        p.add_job([&] (unsigned tid) { some_work(tid, 3); });
+    }
+    p.wait_jobs();
+}
+#+END_EXAMPLE
+
+**** License
+
+[[LICENSE][MIT License]].
+
