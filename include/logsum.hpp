@@ -143,6 +143,7 @@ struct p7_FLogsum_Helper
     {
         // static object whose constructor initializes the lookup table
         static Table_Initializer _init;
+        (void)_init;
 
         const float max = ESL_MAX(a, b);
         const float min = ESL_MIN(a, b);
