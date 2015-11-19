@@ -6,7 +6,9 @@
 #include <functional>
 #include <boost/preprocessor.hpp>
 
-#include "algorithm_extra.hpp"
+#include "alg.hpp"
+
+using namespace alg;
 
 typedef std::vector< int > int_vector;
 typedef std::vector< int >::iterator int_vector_iterator;
@@ -379,5 +381,33 @@ TEST_CASE("for_each_it_advance")
         x = 5;
         for_each_it_advance(l, lbd);
         CHECK( l == int_list({ 1, 2, 4 }) );
+    }
+}
+
+TEST_CASE("os_join")
+{
+    SECTION("empty range")
+    {
+        std::string s = os_join(std::vector< int >(), ",");
+        std::ostringstream os;
+        os << os_join(std::vector< int >(), ",");
+        CHECK( s == "" );
+        CHECK( os.str() == "" );
+    }
+    SECTION("singleton range")
+    {
+        std::string s = os_join(std::vector< int >{ 42 }, ",");
+        std::ostringstream os;
+        os << os_join(std::vector< int >{ 42 }, ",");
+        CHECK( s == "42" );
+        CHECK( os.str() == "42" );
+    }
+    SECTION("multi-element range")
+    {
+        std::string s = os_join(std::vector< char >{ 'a', 'b', 'c' }, "-");
+        std::ostringstream os;
+        os << os_join(std::vector< char >{ 'a', 'b', 'c' }, "-");
+        CHECK( s == "a-b-c" );
+        CHECK( os.str() == "a-b-c" );
     }
 }

@@ -8,7 +8,9 @@ A collection of C++ (mostly, C++11) header-only utility libraries.
 
 Below you can find code snippets. For full examples and some tests, see the [[examples]] folder. In some cases, sample programs are included in the header files themselves, and they can be enabled by specific CPP defines.
 
-***** logger: Thread-safe facility-based logging mechanism.
+***** logger
+
+A thread-safe facility-based logging mechanism.
 
 #+BEGIN_EXAMPLE
 #include "logger.hpp"
@@ -21,7 +23,9 @@ LOG(debug) << "now you don't; c=" << ++c << "\n";
 assert(c == 1);
 #+END_EXAMPLE
 
-***** zstr: ZLib wrapper.
+***** zstr
+
+A ZLib wrapper.
 
 #+BEGIN_EXAMPLE
 #include "zstr.hpp"
@@ -29,23 +33,31 @@ assert(c == 1);
 zstr::ifstream(argv[1]) >> i;
 #+END_EXAMPLE
 
-***** algorithm_extra: Collection of new and extended SL algorithms.
+***** alg
+
+Collection of new and extended SL algorithms. Contents:
+
+- =for_each[_it][_advance]=: Apply functor to elements in range. Options: take iterator pair or range as input; pass iterator instead of element to functor; store next iterator prior to applying functor (e.g. use: remove elements from a list in one pass.)
+
+- =(min|max|minmax)[_value]_of=: Find min and/or max in range. Options: take iterator pair or range as input; optionally use functor to extract key; return iterator or value.
+
+- =mean_stdv_of=: Find mean and sample stdv of elements in range. Options: take iterator pair or range as input; optionally use functor to extract key.
+
+- =(equal|all|any)_of=: Check range of elements are equal, or that all are true, or that at least one is true. Options: take iterator pair or range as input; optionally use functor to extract key.
+
+- =os_join=: Use =operator <<= overloads to print range or to convert it to string using a custom separator. Options: take iterator pair or range as input; optionally use functor to extract key.
 
 #+BEGIN_EXAMPLE
-#include "algorithm_extra.hpp"
+#include "alg.hpp"
 ...
-bool equal_mod_3 = equal_of(std::vector< int >{3, 6, 18}, [] (int i) { return i%3; }); // true
+std::vector< int > v{3, 6, 18};
+bool equal_mod_3 = alg::equal_of(v, [] (int i) { return i%3; }); // true
+std::cout << "v: " << alg::os_join(v, ", ") << std::endl; // prints "v: 3, 6, 18"
 #+END_EXAMPLE
 
-***** join: A C++ implementation of Python's join.
+***** logsum
 
-#+BEGIN_EXAMPLE
-#include "join.hpp"
-...
-std::cout << "v: " << join_ns::join(std::vector< int >{1, 2, 3}, ", ") << std::endl;
-#+END_EXAMPLE
-
-***** logsum: Floating point additions in logarithmic space using table lookup.
+Floating point additions in logarithmic space using table lookup.
 
 *Note*: This library is based on Sean Eddy's code, originall part of HMMER. The version included in here is header-only, and it using implicit table initialization (no need to explicitly call =p7_FLogsumInit()=).
 
@@ -55,7 +67,9 @@ std::cout << "v: " << join_ns::join(std::vector< int >{1, 2, 3}, ", ") << std::e
 float r = p7_FLogsum(.5, .3); // ~= log(exp(.5) + exp(.3))
 #+END_EXAMPLE
 
-***** pfor: C++11-based parallel for, with optional output sorting.
+***** pfor
+
+A C++11-based parallel for, with optional output sorting.
 
 #+BEGIN_EXAMPLE
 #include "pfor.hpp"
@@ -76,7 +90,9 @@ pfor::pfor< unsigned >(
     });
 #+END_EXAMPLE
 
-***** tpool: C++11-based thread pool.
+***** tpool
+
+A C++11-based thread pool.
 
 #+BEGIN_EXAMPLE
 #include "tpool.hpp"
