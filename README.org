@@ -14,8 +14,11 @@ Below you can find code snippets. For full examples and some tests, see the [[ex
 #include "logger.hpp"
 ...
 logger::Logger::set_default_level("info");
-LOG(info) << "now you see me\n";
-LOG(debug) << "now you don't\n";
+int c = 0;
+LOG(info) << "now you see me; c=" << ++c << "\n";
+assert(c == 1);
+LOG(debug) << "now you don't; c=" << ++c << "\n";
+assert(c == 1);
 #+END_EXAMPLE
 
 ***** zstr: ZLib wrapper.
@@ -31,7 +34,7 @@ zstr::ifstream(argv[1]) >> i;
 #+BEGIN_EXAMPLE
 #include "algorithm_extra.hpp"
 ...
-auto all_div_by_3 = equal_of(std::vector< int >{3, 6, 17}, [] (int i) { return i%3; }); // true
+bool equal_mod_3 = equal_of(std::vector< int >{3, 6, 18}, [] (int i) { return i%3; }); // true
 #+END_EXAMPLE
 
 ***** join: A C++ implementation of Python's join.
@@ -49,7 +52,7 @@ std::cout << "v: " << join_ns::join(std::vector< int >{1, 2, 3}, ", ") << std::e
 #+BEGIN_EXAMPLE
 #include "logsum.hpp"
 ...
-float r = p7_FLogsum(.5, .3);
+float r = p7_FLogsum(.5, .3); // ~= log(exp(.5) + exp(.3))
 #+END_EXAMPLE
 
 ***** pfor: C++11-based parallel for, with optional output sorting.
@@ -80,13 +83,17 @@ pfor::pfor< unsigned >(
 ...
 void some_work(unsigned tid, unsigned i);
 ...
-tpool::tpool p(4); // create a pool of 4 worker threads
-for (int unsigned = 0; round < 10; ++round) // perform 10 rounds of work
+// create a pool of 4 worker threads
+tpool::tpool p(4);
+// perform 10 rounds of work
+for (int unsigned = 0; round < 10; ++round)
 {
-    for (unsigned i = 0; i < n; ++i) // in each round, work on n items
+    // in each round, work on n items
+    for (unsigned i = 0; i < n; i += 2)
     {
+        p.add_job(std::bind(some_work, std::placeholders::_1, i));
         // Note: the lambda must capture i by value, not by reference
-        p.add_job([&,i] (unsigned tid) { some_work(tid, i); });
+        p.add_job([&,i] (unsigned tid) { some_work(tid, i + 1); });
     }
     p.wait_jobs();
 }

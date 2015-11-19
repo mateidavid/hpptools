@@ -167,11 +167,11 @@ g++ -std=c++11 -pthread -D SAMPLE_TPOOL -x c++ tpool.hpp -o test-tpool
 using namespace std;
 using namespace std::placeholders;
 
-void zzz(unsigned tid, unsigned n)
+void zzz(unsigned tid, unsigned i)
 {
     // A silly job for demonstration purposes
-    LOG("tpool", info) << "thread " << tid << ": sleeping for " << n << " seconds" << endl;
-    this_thread::sleep_for(chrono::seconds(n));
+    LOG(info) << "tid=" << tid << " i=" << i << " sleep=" << i % 3 << endl;
+    this_thread::sleep_for(chrono::seconds(i % 3));
 }
 
 int main()
@@ -179,16 +179,17 @@ int main()
     logger::Logger::set_default_level(logger::debug);
     // Create two threads
     tpool::tpool p(2);
-    for (unsigned i = 0; i < 2; ++i)
+    for (unsigned r = 0; r < 2; ++r)
     {
-        LOG("tpool", info) << "start iteration " << i << endl;
+        LOG(info) << "start round " << r << endl;
         // Assign them 4 jobs
-        p.add_job(bind(zzz, _1, 1));
-        p.add_job(bind(zzz, _1, 2));
-        p.add_job([&] (unsigned tid) { zzz(tid, 3); });
-        p.add_job([&] (unsigned tid) { zzz(tid, 4); });
+        for (unsigned i = 0; i < 10; i += 2)
+        {
+            p.add_job(bind(zzz, _1, i));
+            p.add_job([&,i] (unsigned tid) { zzz(tid, i + 1); });
+        }
         p.wait_jobs();
-        LOG("tpool", info) << "end iteration " << i << endl;
+        LOG(info) << "end iteration " << r << endl;
     }
 }
 
