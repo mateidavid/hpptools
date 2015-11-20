@@ -39,20 +39,26 @@ Collection of new and extended SL algorithms. Contents:
 
 - =for_each[_it][_advance]=: Apply functor to elements in range. Options: take iterator pair or range as input; pass iterator instead of element to functor; store next iterator prior to applying functor (e.g. use: remove elements from a list in one pass.)
 
-- =(min|max|minmax)[_value]_of=: Find min and/or max in range. Options: take iterator pair or range as input; optionally use functor to extract key; return iterator or value.
+- =(min|max|minmax)[_value]_of=: Find min and/or max in range. Options: take iterator pair or range as input; optionally use functor to extract key; return iterator(s) or value(s).
 
 - =mean_stdv_of=: Find mean and sample stdv of elements in range. Options: take iterator pair or range as input; optionally use functor to extract key.
 
-- =(equal|all|any)_of=: Check range of elements are equal, or that all are true, or that at least one is true. Options: take iterator pair or range as input; optionally use functor to extract key.
+- =(equal|all|any)_of=: Check that all elements in a range are equal, or that all are true, or that at least one is true. Options: take iterator pair or range as input; optionally use functor to extract key.
 
 - =os_join=: Use =operator <<= overloads to print range or to convert it to string using a custom separator. Options: take iterator pair or range as input; optionally use functor to extract key.
 
 #+BEGIN_EXAMPLE
 #include "alg.hpp"
 ...
-std::vector< int > v{3, 6, 18};
-bool equal_mod_3 = alg::equal_of(v, [] (int i) { return i%3; }); // true
-std::cout << "v: " << alg::os_join(v, ", ") << std::endl; // prints "v: 3, 6, 18"
+std::list<int> l{3, 6, 10, 18};
+// erase elements == 0 mod 5 => l == {3, 6, 18}
+alg::for_each_it_advance(l, [&l] (std::list<int>::iterator it) { if (*it%5 == 0) l.erase(it); });
+// iterator to minimum value mod 5 => iterator to 6
+auto it_min_val_mod_5 = alg::min_of(l, [] (int i) { return i%5; });
+// all equal mod 3 => true
+bool equal_mod_3 = alg::equal_of(l, [] (int i) { return i%3; });
+// to ostream => "l: 3, 6, 18"
+std::cout << "l: " << alg::os_join(l, ", ") << std::endl;
 #+END_EXAMPLE
 
 ***** logsum
