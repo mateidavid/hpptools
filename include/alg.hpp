@@ -69,6 +69,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <numeric>
 #include <sstream>
 #include <type_traits>
 
