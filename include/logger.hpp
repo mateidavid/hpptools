@@ -263,7 +263,11 @@ private:
 #define LOG_FACILITY "main"
 #endif
 
+#ifdef WIN32
+#define LOG(...) if (false) std::cout
+#else
 #define LOG(...) __LOG_aux1(__NARGS(__VA_ARGS__), __VA_ARGS__)
+#endif // WIN32
 
 #endif
 
