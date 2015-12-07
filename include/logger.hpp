@@ -253,21 +253,28 @@ private:
 // we need 2-level indirection in order to trigger expansion after token pasting
 // http://stackoverflow.com/questions/1597007/creating-c-macro-with-and-line-token-concatenation-with-positioning-macr
 // http://stackoverflow.com/a/11763196/717706
+#ifdef WIN32
+#define __EXPAND(...) __VA_ARGS__
+#define __LOG_aux2(N, ...) __EXPAND(__LOG_ ## N (__VA_ARGS__))
+#else
 #define __LOG_aux2(N, ...) __LOG_ ## N (__VA_ARGS__)
+#endif
+
 #define __LOG_aux1(N, ...) __LOG_aux2(N, __VA_ARGS__)
 
 #define __NARGS_AUX(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, ...) _9
+
+#ifdef WIN32
+#define __NARGS(...) __EXPAND(__NARGS_AUX(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0))
+#else
 #define __NARGS(...) __NARGS_AUX(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0)
+#endif
 
 #ifndef LOG_FACILITY
 #define LOG_FACILITY "main"
 #endif
 
-#ifdef WIN32
-#define LOG(...) if (false) std::cout
-#else
 #define LOG(...) __LOG_aux1(__NARGS(__VA_ARGS__), __VA_ARGS__)
-#endif // WIN32
 
 #endif
 
