@@ -69,6 +69,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <numeric>
 #include <sstream>
 #include <type_traits>
@@ -291,13 +292,13 @@ min_of(Forward_Range&& rg, Unary_Function&& fn = Unary_Function())
  * @param fn Functor used to obtain key from value.
  */
 template < class Forward_Iterator, class Unary_Function = detail::Identity >
-typename std::result_of< Unary_Function(typename Forward_Iterator::value_type) >::type
+typename std::result_of< Unary_Function(typename std::iterator_traits< Forward_Iterator >::value_type) >::type
 min_value_of(Forward_Iterator first, Forward_Iterator last, Unary_Function&& fn = Unary_Function())
 {
     auto it = min_of(first, last, std::forward< Unary_Function >(fn));
     return it != last
         ? fn(*it)
-        : typename std::result_of< Unary_Function(typename Forward_Iterator::value_type) >::type();
+        : typename std::result_of< Unary_Function(typename std::iterator_traits< Forward_Iterator >::value_type) >::type();
 }
 
 /**
@@ -308,7 +309,7 @@ min_value_of(Forward_Iterator first, Forward_Iterator last, Unary_Function&& fn 
 template < class Forward_Range, class Unary_Function = detail::Identity >
 auto
 min_value_of(Forward_Range&& rg, Unary_Function&& fn = Unary_Function())
-    -> typename std::result_of< Unary_Function(typename decltype(rg.begin())::value_type) >::type
+    -> typename std::result_of< Unary_Function(typename std::iterator_traits< decltype(rg.begin()) >::value_type) >::type
 {
     return min_value_of(rg.begin(), rg.end(), std::forward< Unary_Function >(fn));
 }
@@ -358,13 +359,13 @@ max_of(Forward_Range&& rg, Unary_Function&& fn = Unary_Function())
  * @param fn Functor used to obtain key from value.
  */
 template < class Forward_Iterator, class Unary_Function = detail::Identity >
-typename std::result_of< Unary_Function(typename Forward_Iterator::value_type) >::type
+typename std::result_of< Unary_Function(typename std::iterator_traits< Forward_Iterator >::value_type) >::type
 max_value_of(Forward_Iterator first, Forward_Iterator last, Unary_Function&& fn = Unary_Function())
 {
     auto it = max_of(first, last, std::forward< Unary_Function >(fn));
     return it != last
         ? fn(*it)
-        : typename std::result_of< Unary_Function(typename Forward_Iterator::value_type) >::type();
+        : typename std::result_of< Unary_Function(typename std::iterator_traits< Forward_Iterator >::value_type) >::type();
 }
 
 /**
@@ -375,7 +376,7 @@ max_value_of(Forward_Iterator first, Forward_Iterator last, Unary_Function&& fn 
 template < class Forward_Range, class Unary_Function = detail::Identity >
 auto
 max_value_of(Forward_Range&& rg, Unary_Function&& fn = Unary_Function())
-    -> typename std::result_of< Unary_Function(typename decltype(rg.begin())::value_type) >::type
+    -> typename std::result_of< Unary_Function(typename std::iterator_traits< decltype(rg.begin()) >::value_type) >::type
 {
     return max_value_of(rg.begin(), rg.end(), std::forward< Unary_Function >(fn));
 }
@@ -429,15 +430,15 @@ minmax_of(Forward_Range&& rg, Unary_Function&& fn = Unary_Function())
  * @param fn Functor used to obtain key from value.
  */
 template < class Forward_Iterator, class Unary_Function = detail::Identity >
-std::pair< typename std::result_of< Unary_Function(typename Forward_Iterator::value_type) >::type,
-           typename std::result_of< Unary_Function(typename Forward_Iterator::value_type) >::type >
+std::pair< typename std::result_of< Unary_Function(typename std::iterator_traits< Forward_Iterator >::value_type) >::type,
+           typename std::result_of< Unary_Function(typename std::iterator_traits< Forward_Iterator >::value_type) >::type >
 minmax_value_of(Forward_Iterator first, Forward_Iterator last, Unary_Function&& fn = Unary_Function())
 {
     auto p = minmax_of(first, last, std::forward< Unary_Function >(fn));
     return p.first != last
         ? std::make_pair(fn(*p.first), fn(*p.second))
-        : std::make_pair(typename std::result_of< Unary_Function(typename Forward_Iterator::value_type) >::type(),
-                         typename std::result_of< Unary_Function(typename Forward_Iterator::value_type) >::type());
+        : std::make_pair(typename std::result_of< Unary_Function(typename std::iterator_traits< Forward_Iterator >::value_type) >::type(),
+                         typename std::result_of< Unary_Function(typename std::iterator_traits< Forward_Iterator >::value_type) >::type());
 }
 
 /**
@@ -448,8 +449,8 @@ minmax_value_of(Forward_Iterator first, Forward_Iterator last, Unary_Function&& 
 template < class Forward_Range, class Unary_Function = detail::Identity >
 auto
 minmax_value_of(Forward_Range&& rg, Unary_Function&& fn = Unary_Function())
-    -> std::pair< typename std::result_of< Unary_Function(typename decltype(rg.begin())::value_type) >::type,
-                  typename std::result_of< Unary_Function(typename decltype(rg.begin())::value_type) >::type >
+    -> std::pair< typename std::result_of< Unary_Function(typename std::iterator_traits< decltype(rg.begin()) >::value_type) >::type,
+                  typename std::result_of< Unary_Function(typename std::iterator_traits< decltype(rg.begin()) >::value_type) >::type >
 {
     return minmax_value_of(rg.begin(), rg.end(), std::forward< Unary_Function >(fn));
 }
@@ -625,13 +626,15 @@ g++ -std=c++11 -D SAMPLE_ALG -x c++ alg.hpp -o sample-alg
 */
 
 #include <vector>
+#include <array>
 
 using namespace std;
 using namespace alg;
 
 int main()
 {
-    vector< unsigned > v{ 42, 1, 15 };
+    array< array< unsigned, 3 >, 3 > v2 = {{ {{ 42, 1, 15 }}, {{1, 2, 3}}, {{4, 5, 6}} }};
+    array< unsigned, 3 >& v = v2[0];
     cout << "v: " << os_join(v.begin(), v.end(), ", ") << endl;
     cout << "v[0]: " << os_join(v.begin(), v.begin() + 1, ", ") << endl;
     cout << "v+1: " << os_join(v.begin(), v.end(), ", ", [] (unsigned i) { return i + 1; }) << endl;
@@ -640,6 +643,9 @@ int main()
     cout << "u: " << os_join(vector< int >{ 5, 17, 6 }, ";") << endl;
     string s = os_join(vector< char >{ 'a', 'b', 'c' }, "-");
     cout << "s: " << s << endl;
+    cout << "min: " << min_value_of(v) << endl;
+    cout << "max: " << max_value_of(v) << endl;
+    cout << "minmax: " << minmax_value_of(v).first << "," << minmax_value_of(v).second << endl;
 }
 
 #endif
