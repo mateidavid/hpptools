@@ -148,10 +148,9 @@ struct p7_FLogsum_Helper
         const float max = ESL_MAX(a, b);
         const float min = ESL_MIN(a, b);
 
-        int idx = std::round((max-min)*p7_LOGSUM_SCALE);
-        return (min == -eslINFINITY || idx >= p7_LOGSUM_TBL)
+        return (min == -eslINFINITY or max - min >= (float)(p7_LOGSUM_TBL - 1) / p7_LOGSUM_SCALE)
             ? max
-            : max + flogsum_lookup()[idx];
+            : max + flogsum_lookup()[(int)((max - min) * p7_LOGSUM_SCALE)];
     }
 
     /* Function:  p7_FLogsumError()

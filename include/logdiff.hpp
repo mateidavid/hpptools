@@ -96,10 +96,9 @@ struct LogDiff_Helper
         static Table_Initializer _init;
         (void)_init;
 
-        unsigned idx = std::round((a - b) * LOGDIFF_SCALE);
-        return (b == -INFINITY or idx >= LOGDIFF_TBL)
+        return (b == -INFINITY or a - b >= (float)(LOGDIFF_TBL - 1) / LOGDIFF_SCALE)
             ? a
-            : a + table()[idx];
+            : a + table()[(int)((a - b) * LOGDIFF_SCALE)];
     }
 
     /* Function:  logdiff_error()
