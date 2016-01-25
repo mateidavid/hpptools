@@ -1,13 +1,11 @@
 SHELL := /bin/bash
 
-DIR = 
-
 .PHONY: all sample clean
 
 all: benchmark-logsum
 
-benchmark-logsum: ../include/logsum.hpp ${DIR}/logsum.h ${DIR}/logsum.cpp
-	g++ -std=c++11 -O2 -Wall -Wextra -pedantic -I ${DIR} -DBENCHMARK_p7LOGSUM -x c++ ../include/logsum.hpp ${DIR}/logsum.cpp -o $@
+benchmark-logsum: ../include/logsum.hpp
+	g++ -std=c++11 -O2 -Wall -Wextra -pedantic -DBENCHMARK_p7LOGSUM -x c++ ../include/logsum.hpp -o $@
 
 run: benchmark-logsum
 	./benchmark-logsum 42 0

@@ -261,20 +261,21 @@ Run:
 #include <chrono>
 #include <iostream>
 #include <random>
-#include <set>
+#include <deque>
 #include <sstream>
 #include <vector>
 
-#include "logsum.h"
-
 using namespace std;
+using namespace logsum;
 
 int main(int argc, char* argv[])
 {
     if (argc < 3)
     {
         cerr << "use: " << argv[0] << " <seed> <version>" << endl
-             << "where <version> is 0 for old, 1 for new" << endl;
+             << "where <version> means:" << endl
+             << "  0: use exp&log" << endl
+             << "  1: use table lookup" << endl;
         return EXIT_FAILURE;
     }
     size_t seed = 0;
@@ -287,47 +288,44 @@ int main(int argc, char* argv[])
     }
     clog << "seed: " << seed << endl;
     clog << "version: " << version << endl;
-    const unsigned n = 1000000;
-    set< float > s;
+    const unsigned n = 100000000;
+    std::deque< std::pair< float, float > > s;
     mt19937 rg(seed);
     uniform_real_distribution< float > unif;
     for (unsigned i = 0; i < n; ++i)
     {
-        s.insert(unif(rg));
+        s.emplace_back(unif(rg), unif(rg));
     }
-    p7_FLogsumInit();
+    float res = 0.0;
 
     // start timer
     auto start_time = chrono::high_resolution_clock::now();
 
     if (version == 0)
     {
-        while (s.size() > 1)
+        for (unsigned i = 0; i < s.size(); ++i)
         {
-            float a = *s.begin();
-            s.erase(s.begin());
-            float b = *s.begin();
-            s.erase(s.begin());
-            s.insert(::p7_FLogsum(a, b));
+            float& a = s[i].first;
+            float& b = s[i].second;
+            res = std::log(std::exp(a) + std::exp(b));
+            (void)res;
         }
     }
     else if (version == 1)
     {
-        while (s.size() > 1)
+        for (unsigned i = 0; i < s.size(); ++i)
         {
-            float a = *s.begin();
-            s.erase(s.begin());
-            float b = *s.begin();
-            s.erase(s.begin());
-            s.insert(logsum::p7_FLogsum(a, b));
+            float& a = s[i].first;
+            float& b = s[i].second;
+            res = logsum::p7_FLogsum(a, b);
+            (void)res;
         }
     }
 
     // end timer
     auto end_time = chrono::high_resolution_clock::now();
 
-    cout << "time: " << chrono::duration_cast< chrono::milliseconds >(end_time - start_time).count() << endl
-         << "result: " << *s.begin() << endl;
+    cout << "time: " << chrono::duration_cast< chrono::milliseconds >(end_time - start_time).count() << endl;
 }
 
 #endif
