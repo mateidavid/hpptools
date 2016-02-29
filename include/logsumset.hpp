@@ -67,7 +67,7 @@ public:
                 assert(not std::isnan(b));
                 _val_set.erase(_val_set.begin());
 #ifdef LOG
-                if (b - a > 15.7 and b > -80)
+                if (not std::isinf(a) and b - a > 15.7 and b > -80)
                 {
                     LOG("logsumset", warning)
                         << "precision loss: a=" << a << " b=" << b << std::endl;
