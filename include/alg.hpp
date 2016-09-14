@@ -68,6 +68,7 @@
 #define __ALG_HPP
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <iterator>
 #include <numeric>
