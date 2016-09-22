@@ -1,1 +1,1 @@
-#define HPPTOOLS_VERSION "1.1.2"
+#define HPPTOOLS_VERSION "1.1.3"
