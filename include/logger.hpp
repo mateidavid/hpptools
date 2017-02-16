@@ -81,9 +81,17 @@ public:
     Logger(const std::string& facility, level msg_level,
            const std::string& file_name, unsigned line_num, const std::string& func_name,
            std::ostream& os = std::clog)
-        : _os_p(&os)
+        : _os_p(&os), _policy(0)
     {
         *this << "= " << facility << "." << int(msg_level)
+              << " " << file_name << ":" << line_num
+              << " " << func_name << " ";
+    }
+    Logger(int policy, const std::string& file_name, unsigned line_num, const std::string& func_name,
+           std::ostream& os = std::cerr)
+        : _os_p(&os), _policy(policy)
+    {
+        *this << "= main." << int(error)
               << " " << file_name << ":" << line_num
               << " " << func_name << " ";
     }
@@ -91,6 +99,8 @@ public:
     ~Logger()
     {
         _os_p->write(this->str().c_str(), this->str().size());
+        if (_policy < 0) std::abort();
+        if (_policy > 0) std::exit(_policy);
     }
     // Produce l-value for output chaining.
     std::ostream& l_value() { return *this; }
@@ -176,6 +186,7 @@ public:
 private:
     // sink for this Logger object
     std::ostream* _os_p;
+    int _policy;
 
     // private static data members
     static level& default_level()
@@ -275,6 +286,9 @@ private:
 #endif
 
 #define LOG(...) __LOG_aux1(__NARGS(__VA_ARGS__), __VA_ARGS__)
+#define LOG_EXITCODE(c) logger::Logger((c), __FILENAME__, __LINE__, __func__).l_value()
+#define LOG_ABORT LOG_EXITCODE(-1)
+#define LOG_EXIT LOG_EXITCODE(EXIT_FAILURE)
 
 #endif
 
