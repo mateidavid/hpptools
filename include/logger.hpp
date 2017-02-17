@@ -1,5 +1,4 @@
 /// Part of: https://github.com/mateidavid/hpptools
-/// Commit: 0f85cd8
 
 /// @author    Matei David, Ontario Institute for Cancer Research
 /// @version   1.0
