@@ -1,17 +1,3 @@
-/// @author    Matei David, Ontario Institute for Cancer Research
-/// @version   1.0
-/// @date      2015
-/// @copyright MIT Public License
-///
-/// Strict fstream objects.
-///
-/// This namespace defines wrappers for std::ifstream, std::ofstream, and
-/// std::fstream objects. The wrappers perform the following steps:
-/// - check the open modes make sense
-/// - check that the call to open() is successful
-/// - (for input streams) check that the opened file is peek-able
-/// - turn on the badbit in the exception mask
-
 #ifndef __STRICT_FSTREAM_HPP
 #define __STRICT_FSTREAM_HPP
 
@@ -20,8 +6,42 @@
 #include <cstring>
 #include <string>
 
+/**
+ * This namespace defines wrappers for std::ifstream, std::ofstream, and
+ * std::fstream objects. The wrappers perform the following steps:
+ * - check the open modes make sense
+ * - check that the call to open() is successful
+ * - (for input streams) check that the opened file is peek-able
+ * - turn on the badbit in the exception mask
+ */
 namespace strict_fstream
 {
+
+/// Overload of error-reporting function, to enable use with VS.
+/// Ref: http://stackoverflow.com/a/901316/717706
+static std::string strerror()
+{
+    std::string buff(80, '\0');
+#ifdef _WIN32
+    if (strerror_s(&buff[0], buff.size(), errno) != 0)
+    {
+        buff = "Unknown error";
+    }
+#elif (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
+// XSI-compliant strerror_r()
+    if (strerror_r(errno, &buff[0], buff.size()) != 0)
+    {
+        buff = "Unknown error";
+    }
+#else
+// GNU-specific strerror_r()
+    auto p = strerror_r(errno, &buff[0], buff.size());
+    std::string tmp(p, std::strlen(p));
+    std::swap(buff, tmp);
+#endif
+    buff.resize(buff.find('\0'));
+    return buff;
+}
 
 /// Exception class thrown by failed operations.
 class Exception
@@ -62,11 +82,11 @@ struct static_method_holder
                 "binary"
             };
         std::string res;
-        for (size_t i = 0; i < n_modes; ++i)
+        for (int i = 0; i < n_modes; ++i)
         {
             if (mode & mode_val_v[i])
             {
-                res += (not res.empty()? "|" : "");
+                res += (! res.empty()? "|" : "");
                 res += mode_name_v[i];
             }
         }
@@ -75,15 +95,15 @@ struct static_method_holder
     }
     static void check_mode(const std::string& filename, std::ios_base::openmode mode)
     {
-        if ((mode & std::ios_base::trunc) and not (mode & std::ios_base::out))
+        if ((mode & std::ios_base::trunc) && ! (mode & std::ios_base::out))
         {
             throw Exception(std::string("strict_fstream: open('") + filename + "'): mode error: trunc and not out");
         }
-        else if ((mode & std::ios_base::app) and not (mode & std::ios_base::out))
+        else if ((mode & std::ios_base::app) && ! (mode & std::ios_base::out))
         {
             throw Exception(std::string("strict_fstream: open('") + filename + "'): mode error: app and not out");
         }
-        else if ((mode & std::ios_base::trunc) and (mode & std::ios_base::app))
+        else if ((mode & std::ios_base::trunc) && (mode & std::ios_base::app))
         {
             throw Exception(std::string("strict_fstream: open('") + filename + "'): mode error: trunc and app");
         }
@@ -94,7 +114,7 @@ struct static_method_holder
         {
             throw Exception(std::string("strict_fstream: open('")
                             + filename + "'," + mode_to_string(mode) + "): open failed: "
-                            + std::strerror(errno));
+                            + strerror());
         }
     }
     static void check_peek(std::istream * is_p, const std::string& filename, std::ios_base::openmode mode)
@@ -110,7 +130,7 @@ struct static_method_holder
         {
             throw Exception(std::string("strict_fstream: open('")
                             + filename + "'," + mode_to_string(mode) + "): peek failed: "
-                            + std::strerror(errno));
+                            + strerror());
         }
         is_p->clear();
     }
@@ -168,7 +188,7 @@ public:
     }
     void open(const std::string& filename, std::ios_base::openmode mode = std::ios_base::in)
     {
-        if (not (mode & std::ios_base::out)) mode |= std::ios_base::in;
+        if (! (mode & std::ios_base::out)) mode |= std::ios_base::in;
         exceptions(std::ios_base::badbit);
         detail::static_method_holder::check_mode(filename, mode);
         std::fstream::open(filename, mode);
