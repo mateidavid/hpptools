@@ -1,1 +1,0 @@
-#define HPPTOOLS_VERSION "1.1.4"
